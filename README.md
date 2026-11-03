@@ -129,6 +129,10 @@ Full interactive documentation is at `http://localhost:8000/docs`.
 
 ## Note on data
 
+Retrieval evaluation and component ablations are available through
+`python -m agent_rag.evaluation`. See [the evaluation guide](docs/EVALUATION.md)
+for dataset validation, corpus requirements, metrics, variants and offline replay.
+
 This repository ships the **serving code** and the **PolyU benchmark dataset**.
 The Neo4j + Qdrant stores start empty — you need to populate them with an indexed
 corpus before live queries return results. The offline indexing pipeline is not

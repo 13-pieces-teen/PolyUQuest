@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import time
 from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
 from pathlib import Path
 from typing import Any, Callable
 
@@ -131,6 +132,7 @@ def retrieve_hybrid(
     t0 = time.time()
     trace: list[dict[str, Any]] = []
     per_mode_results: dict[str, dict[str, Any]] = {}
+    evaluation_errors: dict[str, str] = {}
 
     # Step 1: parallel retrieval. Sub-modes skip their own answer generation —
     # only the final merged-context call hits the LLM.
@@ -138,6 +140,7 @@ def retrieve_hybrid(
     with ThreadPoolExecutor(max_workers=len(valid_modes)) as pool:
         futures = {
             pool.submit(
+                copy_context().run,
                 _MODE_TO_FN[m],
                 query,
                 query_embedding,
@@ -153,6 +156,7 @@ def retrieve_hybrid(
                 per_mode_results[m] = fut.result()
             except Exception as exc:
                 logger.warning("hybrid_submode_failed", mode=m, error=str(exc))
+                evaluation_errors[m] = f"{type(exc).__name__}: {exc}"
                 per_mode_results[m] = {"answer": "", "blocks": [], "trace": []}
 
     trace.append({
@@ -241,4 +245,5 @@ def retrieve_hybrid(
         "answer_prompt": prompt,
         "elapsed_seconds": round(elapsed, 2),
         "trace": trace,
+        "evaluation_errors": evaluation_errors,
     }

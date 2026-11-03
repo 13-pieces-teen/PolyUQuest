@@ -27,6 +27,7 @@ data/pipeline/
 data/raw_html/
 data/metadata/
 logs/
+/results/evaluation/
 
 # === OS / editor ===
 .DS_Store
